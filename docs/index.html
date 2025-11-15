@@ -42,23 +42,26 @@
         }
 
         header {
-            background: var(--card-bg);
-            padding: 30px 20px 20px;
+            background: linear-gradient(to bottom, #ffffff 0%, #f9fafb 100%);
+            padding: 40px 20px 30px;
             text-align: center;
             border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         header h1 {
-            font-size: 2rem;
-            margin-bottom: 8px;
+            font-size: 2.5rem;
+            margin-bottom: 12px;
             font-weight: 700;
             color: var(--text-primary);
+            letter-spacing: -0.5px;
         }
 
         header p {
-            font-size: 0.95rem;
+            font-size: 1.05rem;
             color: var(--text-secondary);
             margin: 0;
+            font-weight: 400;
         }
 
         .header-subtitle {
@@ -605,8 +608,16 @@
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
+            header {
+                padding: 30px 20px 25px;
+            }
+
             header h1 {
-                font-size: 2rem;
+                font-size: 1.75rem;
+            }
+
+            header p {
+                font-size: 0.95rem;
             }
 
             .events-grid {
