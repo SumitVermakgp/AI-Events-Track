@@ -293,24 +293,61 @@
             border-radius: 16px;
             padding: 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
             overflow: hidden;
             border: 1px solid var(--border-color);
+            cursor: pointer;
         }
 
         .event-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .event-card.expanded {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
 
         .event-card-header {
             padding: 20px;
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
         }
 
         .event-card-header.upcoming {
             background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        }
+
+        .event-card-header-content {
+            flex: 1;
+        }
+
+        .event-card-header-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .expand-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .event-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .event-compact-venue {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .event-date-badge {
@@ -350,7 +387,15 @@
         }
 
         .event-body {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+
+        .event-card.expanded .event-body {
             padding: 20px;
+            max-height: 2000px;
         }
 
         .event-badges {
@@ -930,18 +975,28 @@
                 day: 'numeric'
             });
 
+            const cardId = `event-${event['#']}`;
+
             return `
-                <div class="event-card">
+                <div class="event-card" id="${cardId}" onclick="toggleEventCard('${cardId}')">
                     <div class="event-card-header ${isUpcoming ? 'upcoming' : ''}">
-                        <span class="event-date-badge ${isUpcoming ? 'upcoming' : ''}">
-                            ${formattedDate}
-                            ${isUpcoming ? `<span class="countdown">• ${countdown}</span>` : ''}
-                        </span>
-                        <h3 class="event-name">${event.name}</h3>
-                        <p class="event-theme">${event.theme}</p>
+                        <div class="event-card-header-content">
+                            <span class="event-date-badge ${isUpcoming ? 'upcoming' : ''}">
+                                ${formattedDate}
+                                ${isUpcoming ? `<span class="countdown">• ${countdown}</span>` : ''}
+                            </span>
+                            <h3 class="event-name">${event.name}</h3>
+                            <div class="event-compact-venue">
+                                <span>📍</span>
+                                <span>${event.venue}</span>
+                            </div>
+                        </div>
+                        <div class="expand-icon">▼</div>
                     </div>
 
                     <div class="event-body">
+                        <p class="event-theme" style="margin-bottom: 16px; font-style: italic; color: var(--text-secondary);">${event.theme}</p>
+
                         <div class="event-badges">
                             <span class="badge badge-format">${event.format}</span>
                             <span class="badge badge-type">${event.type}</span>
@@ -949,13 +1004,6 @@
                         </div>
 
                         <div class="event-details">
-                            <div class="detail-row">
-                                <span class="detail-icon">📍</span>
-                                <div class="detail-content">
-                                    <span class="detail-label">Venue:</span>
-                                    <span class="detail-value">${event.venue}</span>
-                                </div>
-                            </div>
                             ${event.submission_deadline !== 'N/A' ? `
                             <div class="detail-row">
                                 <span class="detail-icon">✍️</span>
@@ -980,13 +1028,19 @@
 
                         <div class="event-footer">
                             <span class="event-number">#${event['#']}</span>
-                            <a href="${event.url}" target="_blank" rel="noopener noreferrer" class="event-link">
+                            <a href="${event.url}" target="_blank" rel="noopener noreferrer" class="event-link" onclick="event.stopPropagation();">
                                 Learn More →
                             </a>
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        // Toggle event card expansion
+        function toggleEventCard(cardId) {
+            const card = document.getElementById(cardId);
+            card.classList.toggle('expanded');
         }
 
         // Update statistics
