@@ -511,10 +511,11 @@
 
         footer {
             text-align: center;
-            padding: 50px 20px;
+            padding: 50px 20px 30px;
             color: var(--text-secondary);
             border-top: 1px solid var(--border-color);
             margin-top: 60px;
+            background: linear-gradient(to bottom, var(--bg-color) 0%, #f1f5f9 100%);
         }
 
         .update-time {
@@ -525,6 +526,61 @@
             margin-top: 15px;
             font-size: 0.9rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .branding {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .branding-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .branding-logo {
+            height: 40px;
+            width: auto;
+            transition: transform 0.2s;
+        }
+
+        .branding-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .branding-text {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .branding-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .branding-link:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        .love-icon {
+            color: #ef4444;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         /* Mobile Responsive */
@@ -698,6 +754,18 @@
         <p style="margin-top: 20px; font-size: 0.85rem;">
             Data sourced from official event websites • Curated for quality
         </p>
+
+        <div class="branding">
+            <div class="branding-content">
+                <span class="branding-text">AI Event tracker built with <span class="love-icon">♥</span> by</span>
+                <a href="https://responsibleailabs.ai" target="_blank" rel="noopener noreferrer" class="branding-link">
+                    <img src="https://responsibleailabs.ai/rail-logo.svg" alt="Responsible AI Labs" class="branding-logo">
+                </a>
+            </div>
+            <a href="https://responsibleailabs.ai" target="_blank" rel="noopener noreferrer" class="branding-link" style="font-size: 0.9rem;">
+                Visit us at responsibleailabs.ai →
+            </a>
+        </div>
     </footer>
 
     <script>
