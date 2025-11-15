@@ -661,8 +661,8 @@
     <header>
         <div class="container">
             <h1>🤖 AI Events Worldwide</h1>
-            <p>Discover the latest AI conferences, workshops, summits, and talks from around the globe</p>
-            <p class="header-subtitle">📅 July 2025 - November 2026 | 🌍 Global Coverage | 🔄 Updated Daily</p>
+            <p>Discover upcoming AI conferences, workshops, summits, and talks from around the globe</p>
+            <p class="header-subtitle">📅 November 2025 - November 2026 | 🌍 Global Coverage | 🔄 Updated Daily</p>
         </div>
     </header>
 
@@ -670,11 +670,11 @@
         <div class="stats">
             <div class="stat-card">
                 <span class="stat-number" id="total-events">0</span>
-                <span class="stat-label">Total Events</span>
+                <span class="stat-label">Upcoming Events</span>
             </div>
             <div class="stat-card">
                 <span class="stat-number" id="upcoming-events">0</span>
-                <span class="stat-label">Upcoming Events</span>
+                <span class="stat-label">This Month</span>
             </div>
             <div class="stat-card">
                 <span class="stat-number" id="next-event-days">-</span>
@@ -784,7 +784,20 @@
         async function loadEvents() {
             try {
                 const response = await fetch('events_data.json');
-                allEvents = await response.json();
+                const allEventsData = await response.json();
+
+                // Filter out past events (only show today and future events)
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                allEvents = allEventsData.filter(event => {
+                    const eventDate = new Date(event.date);
+                    eventDate.setHours(0, 0, 0, 0);
+                    return eventDate >= today;
+                });
+
+                console.log(`📅 Filtered ${allEventsData.length - allEvents.length} past events. Showing ${allEvents.length} upcoming events.`);
+
                 initializeFilters();
                 applyFilters();
                 updateStats();
@@ -1116,13 +1129,20 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
+            // Total upcoming events
             document.getElementById('total-events').textContent = allEvents.length;
 
-            const upcomingEvents = allEvents.filter(event => new Date(event.date) >= today);
-            document.getElementById('upcoming-events').textContent = upcomingEvents.length;
+            // Events this month (November 2025)
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+            const thisMonthEvents = allEvents.filter(event => {
+                const eventDate = new Date(event.date);
+                return eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+            });
+            document.getElementById('upcoming-events').textContent = thisMonthEvents.length;
 
             // Find next event
-            const sortedUpcoming = upcomingEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+            const sortedUpcoming = [...allEvents].sort((a, b) => new Date(a.date) - new Date(b.date));
             if (sortedUpcoming.length > 0) {
                 const nextEvent = sortedUpcoming[0];
                 const daysUntil = daysUntilEvent(nextEvent.date);
