@@ -4,7 +4,7 @@
 
 [![GitHub Actions](https://github.com/SumitVermakgp/AI-Events-Track/workflows/AI%20Events%20Crawler/badge.svg)](https://github.com/SumitVermakgp/AI-Events-Track/actions)
 [![Last Crawl](https://img.shields.io/badge/last%20crawl-daily-blue)](https://github.com/SumitVermakgp/AI-Events-Track/actions)
-[![Events](https://img.shields.io/badge/events-20+-green)](./docs/events_data.json)
+[![Events](https://img.shields.io/badge/events-30+-green)](./docs/events_data.json)
 
 ## 📋 Overview
 
@@ -19,32 +19,54 @@ This repository contains an automated system that:
 
 - **Daily Automated Updates**: GitHub Actions workflow runs at midnight UTC
 - **Global Coverage**: Events from North America, Europe, Asia, Africa, and Latin America
-- **20+ Major Events**: From July 2025 to November 2026
+- **30 Major AI Events**: From July 2025 to November 2026
+- **Expandable Cards**: Click to expand/collapse event details
+- **Timeline & Grid Views**: Beautiful chronological timeline or grid layout
 - **Mobile-Friendly UI**: Responsive design for all devices
 - **Smart Filtering**: Search, format, date, and type filters
-- **Real-time Stats**: Event counts, upcoming events, geographic coverage
+- **Real-time Stats**: Event counts, upcoming events, countdown timers
 
-## 📊 Event Coverage
+## 📊 Event Coverage (30 Events)
 
-### Academic Conferences
-- NeurIPS 2025, ICML 2025, CVPR 2026, ICLR 2026, ACL 2026, AAAI 2026
+### 🎓 Academic Conferences (11)
+- **NeurIPS 2025** - Neural Information Processing Systems (Vancouver)
+- **ICML 2025** - International Conference on Machine Learning (Vancouver)
+- **CVPR 2026** - Computer Vision and Pattern Recognition (Nashville)
+- **ICLR 2026** - Learning Representations (Singapore)
+- **ACL 2026** - Computational Linguistics (Bangkok)
+- **AAAI 2026** - Artificial Intelligence (Philadelphia)
+- **EMNLP 2025** - NLP & Language Models (Miami)
+- **AISTATS 2026** - AI & Statistics (Valencia)
+- **KDD 2026** - Knowledge Discovery & Data Mining (Chicago)
+- **IJCAI 2026** - International Joint Conference on AI (Montreal)
+- **ECCV 2026** - European Computer Vision (Milan)
 
-### Business Summits
-- AI Summit (New York, London)
-- RE•WORK Deep Learning Summit
-- Generative AI World
+### 🏢 Business & Enterprise Summits (8)
+- **AI Summit New York 2025** - Enterprise AI
+- **AI Summit London 2026** - Business AI
+- **World Summit AI 2025** - Doha, Qatar
+- **RE•WORK Deep Learning Summit 2026** - San Francisco
+- **Generative AI World 2026** - Las Vegas
+- **AI World Government Summit 2026** - Dubai, UAE
+- **AI & Big Data Expo 2026** - Amsterdam
+- **EmTech Digital 2026** - MIT Technology Review
 
-### Specialized Events
-- MLOps World 2026
-- AI in Healthcare Summit 2026
-- AI for Good Global Summit 2026
+### 🎯 Specialized AI Events (5)
+- **FAccT 2026** - Fairness, Accountability & Transparency (Barcelona)
+- **MLOps World 2026** - ML Operations (Austin)
+- **AI in Healthcare Summit 2026** - Medical AI (Boston)
+- **AI for Good Global Summit 2026** - UN Platform (Geneva)
+- **AI Hardware Summit 2026** - AI Chips & Accelerators (Santa Clara)
 
-### Developer Events
-- PyTorch Conference 2026
-- TensorFlow Dev Summit 2026
+### 💻 Developer Events (2)
+- **PyTorch Conference 2026** - Deep Learning Frameworks
+- **TensorFlow Dev Summit 2026** - Google ML Platform (Virtual)
 
-### Regional Events
-- AI India Summit, AI China Conference, AI Africa Summit, AI LATAM
+### 🌍 Regional Events (4)
+- **AI India Summit 2026** - Bangalore
+- **AI China Conference 2026** - Beijing
+- **AI Africa Summit 2026** - Cape Town
+- **AI LATAM 2026** - São Paulo
 
 ## 🚀 Live Website
 
