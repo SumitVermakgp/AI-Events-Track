@@ -120,18 +120,18 @@
     "#": 8
   },
   {
-    "name": "AI India Summit 2026",
+    "name": "IndiaAI Summit 2026",
     "format": "Hybrid",
-    "venue": "Bangalore, India",
+    "venue": "New Delhi, India",
     "date": "2026-02-25",
     "theme": "AI Innovation in India and South Asia",
     "type": "Summit",
     "submission_deadline": "N/A",
     "ticket_start_date": "2025-11-01",
     "ticket_end_date": "2026-02-24",
-    "url": "https://www.aiindiasummit.com",
-    "description": "Leading AI event in India covering business and technology",
-    "estimated_attendees": 4000,
+    "url": "https://indiaai.gov.in",
+    "description": "Government of India's flagship AI event fostering innovation and policy dialogue",
+    "estimated_attendees": 5000,
     "#": 9
   },
   {
