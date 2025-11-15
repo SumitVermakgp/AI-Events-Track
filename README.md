@@ -1,10 +1,12 @@
-# 🤖 AI Events Worldwide
+# AI Events Worldwide
 
-> Automatically-updated directory of AI conferences, workshops, summits, and talks from around the globe
+> Discover and track major AI conferences, workshops, summits, and talks from around the globe
+
+**Built with ♥ by [Responsible AI Labs](https://responsibleailabs.ai)**
 
 [![GitHub Actions](https://github.com/SumitVermakgp/AI-Events-Track/workflows/AI%20Events%20Crawler/badge.svg)](https://github.com/SumitVermakgp/AI-Events-Track/actions)
 [![Last Crawl](https://img.shields.io/badge/last%20crawl-daily-blue)](https://github.com/SumitVermakgp/AI-Events-Track/actions)
-[![Events](https://img.shields.io/badge/events-30+-green)](./docs/events_data.json)
+[![Events](https://img.shields.io/badge/events-30-green)](./docs/events_data.json)
 
 ## 📋 Overview
 
@@ -17,14 +19,14 @@ This repository contains an automated system that:
 
 ## 🌟 Features
 
-- **Daily Automated Updates**: GitHub Actions workflow runs at midnight UTC
-- **Global Coverage**: Events from North America, Europe, Asia, Africa, and Latin America
-- **30 Major AI Events**: From July 2025 to November 2026
-- **Expandable Cards**: Click to expand/collapse event details
-- **Timeline & Grid Views**: Beautiful chronological timeline or grid layout
-- **Mobile-Friendly UI**: Responsive design for all devices
-- **Smart Filtering**: Search, format, date, and type filters
-- **Real-time Stats**: Event counts, upcoming events, countdown timers
+- **🔄 Daily Automated Updates**: GitHub Actions workflow runs at midnight UTC
+- **🌍 Global Coverage**: Events from North America, Europe, Asia, Africa, and Latin America
+- **📊 30 Major AI Events**: Curated events from November 2025 to November 2026
+- **📱 Mobile-First Design**: Collapsible filters and responsive layout optimized for mobile
+- **🎨 Timeline & Grid Views**: Beautiful chronological timeline or card grid layout
+- **🔍 Smart Search & Filtering**: Filter by format, type, month, and search across all fields
+- **📈 Real-time Stats**: Event counts, upcoming events, countdown timers, and more
+- **🎯 Auto-hide Past Events**: Only shows current and upcoming events
 
 ## 📊 Event Coverage (30 Events)
 
@@ -63,7 +65,7 @@ This repository contains an automated system that:
 - **TensorFlow Dev Summit 2026** - Google ML Platform (Virtual)
 
 ### 🌍 Regional Events (4)
-- **AI India Summit 2026** - Bangalore
+- **IndiaAI Summit 2026** - New Delhi (Government of India flagship event)
 - **AI China Conference 2026** - Beijing
 - **AI Africa Summit 2026** - Cape Town
 - **AI LATAM 2026** - São Paulo
@@ -179,11 +181,17 @@ This is an automated system. For event suggestions or corrections:
 
 MIT License - Data sourced from official event websites and public sources.
 
-## 📧 Contact
+## 📧 Contact & Support
 
-- GitHub Issues: [Report a problem](https://github.com/SumitVermakgp/AI-Events-Track/issues)
-- Repository: [SumitVermakgp/AI-Events-Track](https://github.com/SumitVermakgp/AI-Events-Track)
+- **Report Issues**: [GitHub Issues](https://github.com/SumitVermakgp/AI-Events-Track/issues)
+- **Responsible AI Labs**: [responsibleailabs.ai](https://responsibleailabs.ai)
 
 ---
 
-**🤖 Automated by GitHub Actions** | **📅 Updated Daily** | **🌍 Global Coverage**
+<div align="center">
+
+**Built with ♥ by [Responsible AI Labs](https://responsibleailabs.ai)**
+
+🤖 Automated by GitHub Actions | 📅 Updated Daily | 🌍 Global Coverage
+
+</div>
