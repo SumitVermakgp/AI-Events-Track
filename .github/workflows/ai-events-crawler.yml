@@ -1,0 +1,79 @@
+name: AI Events Crawler
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual trigger
+  push:
+    branches:
+      - claude/keep-all-that-*
+    paths:
+      - 'ai_events_crawler.py'
+      - '.github/workflows/ai-events-crawler.yml'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  crawl-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run AI Events Crawler
+        run: |
+          python3 ai_events_crawler.py
+
+      - name: Check for changes
+        id: git-check
+        run: |
+          git diff --exit-code docs/events_data.json || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push if changed
+        if: steps.git-check.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/events_data.json
+          git commit -m "🤖 Auto-update: New AI events added on $(date +'%Y-%m-%d')"
+          git push
+
+      - name: No changes detected
+        if: steps.git-check.outputs.changed != 'true'
+        run: |
+          echo "✅ No new events found. Data is up to date!"
+
+  deploy-pages:
+    needs: crawl-and-update
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/claude/keep-all-that-015eUbhzi9C7eFDEJ3GvbwWU'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: claude/keep-all-that-015eUbhzi9C7eFDEJ3GvbwWU
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
