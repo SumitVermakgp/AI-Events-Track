@@ -135,6 +135,21 @@
     "#": 9
   },
   {
+    "name": "AI India Summit 2026",
+    "format": "Hybrid",
+    "venue": "Bangalore, India",
+    "date": "2026-02-25",
+    "theme": "AI Innovation in India and South Asia",
+    "type": "Summit",
+    "submission_deadline": "N/A",
+    "ticket_start_date": "2025-11-01",
+    "ticket_end_date": "2026-02-24",
+    "url": "https://www.aiindiasummit.com",
+    "description": "Leading AI event in India covering business and technology",
+    "estimated_attendees": 4000,
+    "#": 10
+  },
+  {
     "name": "AI & Big Data Expo 2026",
     "format": "In-person",
     "venue": "Amsterdam, Netherlands",
@@ -147,7 +162,7 @@
     "url": "https://aibigdataexpo.com",
     "description": "Leading enterprise AI and big data expo with hands-on workshops and vendor exhibitions",
     "estimated_attendees": 8000,
-    "#": 10
+    "#": 11
   },
   {
     "name": "Generative AI World 2026",
@@ -162,7 +177,7 @@
     "url": "https://www.gen-ai.world",
     "description": "Focused on generative AI, LLMs, and creative AI applications",
     "estimated_attendees": 4000,
-    "#": 11
+    "#": 12
   },
   {
     "name": "TensorFlow Dev Summit 2026",
@@ -177,7 +192,7 @@
     "url": "https://www.tensorflow.org/dev-summit",
     "description": "Google's annual TensorFlow developer conference",
     "estimated_attendees": 10000,
-    "#": 12
+    "#": 13
   },
   {
     "name": "ICLR 2026",
@@ -192,7 +207,7 @@
     "url": "https://iclr.cc",
     "description": "Top-tier deep learning research conference",
     "estimated_attendees": 8000,
-    "#": 13
+    "#": 14
   },
   {
     "name": "AISTATS 2026",
@@ -207,7 +222,7 @@
     "url": "https://aistats.org",
     "description": "Interdisciplinary conference at the intersection of AI, machine learning, and statistics",
     "estimated_attendees": 1500,
-    "#": 14
+    "#": 15
   },
   {
     "name": "AI in Healthcare Summit 2026",
@@ -222,7 +237,7 @@
     "url": "https://www.ai-healthcare-summit.com",
     "description": "AI innovations for healthcare, diagnostics, and drug discovery",
     "estimated_attendees": 2500,
-    "#": 15
+    "#": 16
   },
   {
     "name": "EmTech Digital 2026",
@@ -237,7 +252,7 @@
     "url": "https://events.technologyreview.com",
     "description": "MIT Technology Review's conference on AI and emerging tech",
     "estimated_attendees": 3000,
-    "#": 16
+    "#": 17
   },
   {
     "name": "MLOps World 2026",
@@ -252,7 +267,7 @@
     "url": "https://mlopsworld.com",
     "description": "The leading event for ML engineering and operations",
     "estimated_attendees": 3000,
-    "#": 17
+    "#": 18
   },
   {
     "name": "AI Summit London 2026",
@@ -267,7 +282,7 @@
     "url": "https://theaisummit.com",
     "description": "Europe's leading AI event for business and technology leaders",
     "estimated_attendees": 6000,
-    "#": 18
+    "#": 19
   },
   {
     "name": "CVPR 2026",
@@ -282,7 +297,7 @@
     "url": "https://cvpr.cc",
     "description": "Leading conference in computer vision research",
     "estimated_attendees": 12000,
-    "#": 19
+    "#": 20
   },
   {
     "name": "FAccT 2026",
@@ -297,7 +312,7 @@
     "url": "https://facctconference.org",
     "description": "Leading conference on responsible AI, algorithmic fairness, and ethical considerations in machine learning",
     "estimated_attendees": 2000,
-    "#": 20
+    "#": 21
   },
   {
     "name": "AI for Good Global Summit 2026",
@@ -312,7 +327,7 @@
     "url": "https://aiforgood.itu.int",
     "description": "UN's leading platform on AI for social good",
     "estimated_attendees": 2500,
-    "#": 21
+    "#": 22
   },
   {
     "name": "AI China Conference 2026",
@@ -327,7 +342,7 @@
     "url": "https://www.aichinaconf.com",
     "description": "Major AI conference showcasing Chinese AI research and applications",
     "estimated_attendees": 8000,
-    "#": 22
+    "#": 23
   },
   {
     "name": "ACL 2026",
@@ -342,7 +357,7 @@
     "url": "https://www.aclweb.org",
     "description": "Premier conference for natural language processing and computational linguistics",
     "estimated_attendees": 6000,
-    "#": 23
+    "#": 24
   },
   {
     "name": "KDD 2026",
@@ -357,7 +372,7 @@
     "url": "https://kdd.org",
     "description": "Premier conference on data science, data mining, and knowledge discovery",
     "estimated_attendees": 4000,
-    "#": 24
+    "#": 25
   },
   {
     "name": "IJCAI 2026",
@@ -372,7 +387,7 @@
     "url": "https://ijcai.org",
     "description": "One of the oldest and most prestigious AI conferences covering all aspects of AI",
     "estimated_attendees": 3500,
-    "#": 25
+    "#": 26
   },
   {
     "name": "AI Hardware Summit 2026",
@@ -387,7 +402,7 @@
     "url": "https://aihardwaresummit.com",
     "description": "Focused on AI hardware, chip design, GPUs, TPUs, and edge AI acceleration",
     "estimated_attendees": 2500,
-    "#": 26
+    "#": 27
   },
   {
     "name": "AI Africa Summit 2026",
@@ -402,7 +417,7 @@
     "url": "https://www.aiafricasummit.com",
     "description": "Bringing AI innovation to solve African challenges",
     "estimated_attendees": 2000,
-    "#": 27
+    "#": 28
   },
   {
     "name": "PyTorch Conference 2026",
@@ -417,7 +432,7 @@
     "url": "https://pytorchconf.com",
     "description": "Community conference for PyTorch developers and researchers",
     "estimated_attendees": 3000,
-    "#": 28
+    "#": 29
   },
   {
     "name": "ECCV 2026",
@@ -432,7 +447,7 @@
     "url": "https://eccv2026.eu",
     "description": "Top European computer vision conference with cutting-edge research in visual AI",
     "estimated_attendees": 3000,
-    "#": 29
+    "#": 30
   },
   {
     "name": "AI LATAM 2026",
@@ -447,6 +462,6 @@
     "url": "https://www.ailatam.com",
     "description": "Largest AI event in Latin America",
     "estimated_attendees": 3500,
-    "#": 30
+    "#": 31
   }
 ]
