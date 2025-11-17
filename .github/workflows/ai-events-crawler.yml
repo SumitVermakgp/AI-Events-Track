@@ -32,6 +32,11 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+
       - name: Run AI Events Crawler
         run: |
           python3 ai_events_crawler.py

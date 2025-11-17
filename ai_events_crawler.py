@@ -1,22 +1,49 @@
 #!/usr/bin/env python3
 """
-AI Events Crawler
-Crawls and aggregates AI-related events, conferences, talks, and sessions worldwide.
+AI Events Crawler - Real-time web scraping for AI conferences and events
+Crawls WikiCFP, AI Conference Deadlines, and other sources for AI/ML events worldwide.
 """
 
 import json
 import os
 import hashlib
-from datetime import datetime
+import re
+import time
+from datetime import datetime, timedelta
 from typing import List, Dict, Optional
+from urllib.parse import urljoin, urlparse
+
+try:
+    import requests
+    from bs4 import BeautifulSoup
+    from dateutil import parser as date_parser
+    SCRAPING_ENABLED = True
+except ImportError:
+    SCRAPING_ENABLED = False
+    print("⚠️  Warning: requests/beautifulsoup4 not installed. Install with: pip install -r requirements.txt")
 
 
 class AIEventsCrawler:
-    """Crawler for AI-related events worldwide."""
+    """Real-time crawler for AI-related events worldwide."""
+
+    # Keywords to search for AI/ML related events
+    AI_KEYWORDS = [
+        "artificial intelligence", "machine learning", "deep learning",
+        "neural networks", "natural language processing", "NLP",
+        "computer vision", "reinforcement learning", "AI",
+        "data science", "big data", "MLOps", "generative AI",
+        "large language models", "LLM", "responsible AI", "AI safety",
+        "AI ethics", "fairness", "accountability", "transparency"
+    ]
 
     def __init__(self, data_file: str = "docs/events_data.json"):
         self.data_file = data_file
         self.events = []
+        self.session = requests.Session() if SCRAPING_ENABLED else None
+        if self.session:
+            self.session.headers.update({
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            })
         self.load_existing_data()
 
     def load_existing_data(self):
@@ -42,7 +69,10 @@ class AIEventsCrawler:
 
     def generate_event_id(self, event: Dict) -> str:
         """Generate unique ID for event based on name, date, and location."""
-        key = f"{event['name']}_{event['date']}_{event['venue']}"
+        name = event.get('name', '').strip()
+        date = event.get('date', '').strip()
+        venue = event.get('venue', '').strip()
+        key = f"{name}_{date}_{venue}".lower()
         return hashlib.md5(key.encode()).hexdigest()
 
     def event_exists(self, event: Dict) -> bool:
@@ -51,19 +81,213 @@ class AIEventsCrawler:
         existing_ids = [self.generate_event_id(e) for e in self.events]
         return event_id in existing_ids
 
-    def add_event(self, event: Dict):
+    def add_event(self, event: Dict) -> bool:
         """Add event if it doesn't already exist."""
         if not self.event_exists(event):
             self.events.append(event)
             return True
         return False
 
-    def crawl_major_ai_events(self):
+    def normalize_date(self, date_str: str) -> Optional[str]:
+        """Normalize various date formats to YYYY-MM-DD."""
+        if not date_str or date_str == "N/A":
+            return None
+
+        try:
+            # Try parsing the date
+            parsed_date = date_parser.parse(date_str, fuzzy=True)
+            return parsed_date.strftime("%Y-%m-%d")
+        except:
+            return None
+
+    def extract_venue(self, location_str: str) -> str:
+        """Extract clean venue from location string."""
+        if not location_str:
+            return "TBD"
+
+        # Clean up common patterns
+        location_str = location_str.strip()
+        location_str = re.sub(r'\s+', ' ', location_str)
+
+        # Remove "Location:" prefix if present
+        location_str = re.sub(r'^Location:\s*', '', location_str, flags=re.IGNORECASE)
+
+        return location_str if location_str else "TBD"
+
+    def scrape_wikicfp(self) -> List[Dict]:
+        """Scrape AI/ML conferences from WikiCFP."""
+        if not SCRAPING_ENABLED:
+            return []
+
+        print("\n🔍 Scraping WikiCFP for AI conferences...")
+        events = []
+
+        # WikiCFP categories for AI/ML
+        categories = ["artificial intelligence", "machine learning", "data mining"]
+
+        for category in categories:
+            try:
+                url = f"http://www.wikicfp.com/cfp/call?conference={category.replace(' ', '%20')}"
+                response = self.session.get(url, timeout=15)
+
+                if response.status_code != 200:
+                    print(f"  ⚠️  Failed to fetch WikiCFP category: {category}")
+                    continue
+
+                soup = BeautifulSoup(response.content, 'lxml')
+                rows = soup.find_all('tr')
+
+                for row in rows:
+                    try:
+                        cells = row.find_all('td')
+                        if len(cells) < 3:
+                            continue
+
+                        # Extract event name and link
+                        event_link = cells[0].find('a')
+                        if not event_link:
+                            continue
+
+                        event_name = event_link.get_text(strip=True)
+                        event_url = urljoin("http://www.wikicfp.com", event_link.get('href', ''))
+
+                        # Extract location
+                        location = cells[1].get_text(strip=True) if len(cells) > 1 else "TBD"
+
+                        # Extract date
+                        date_str = cells[2].get_text(strip=True) if len(cells) > 2 else None
+                        event_date = self.normalize_date(date_str)
+
+                        if not event_date:
+                            continue
+
+                        # Only include future events
+                        if datetime.strptime(event_date, "%Y-%m-%d") < datetime.now():
+                            continue
+
+                        # Create event object
+                        event = {
+                            "name": event_name,
+                            "format": "Hybrid",  # Default, can be refined
+                            "venue": self.extract_venue(location),
+                            "date": event_date,
+                            "theme": category.title(),
+                            "type": "Conference",
+                            "submission_deadline": "N/A",
+                            "ticket_start_date": "N/A",
+                            "ticket_end_date": "N/A",
+                            "url": event_url,
+                            "description": f"{event_name} - {category.title()} conference",
+                            "estimated_attendees": 1000  # Default estimate
+                        }
+
+                        events.append(event)
+
+                    except Exception as e:
+                        continue
+
+                print(f"  ✓ Found {len([e for e in events if category.lower() in e.get('theme', '').lower()])} events in {category}")
+                time.sleep(1)  # Be polite to the server
+
+            except Exception as e:
+                print(f"  ⚠️  Error scraping WikiCFP {category}: {str(e)}")
+
+        return events
+
+    def scrape_ai_deadlines(self) -> List[Dict]:
+        """Scrape AI conference deadlines from aideadlin.es."""
+        if not SCRAPING_ENABLED:
+            return []
+
+        print("\n🔍 Scraping AI Conference Deadlines...")
+        events = []
+
+        try:
+            url = "https://aideadlin.es/?sub=ML,CV,NLP,RO,SP,DM"
+            response = self.session.get(url, timeout=15)
+
+            if response.status_code != 200:
+                print("  ⚠️  Failed to fetch aideadlin.es")
+                return events
+
+            soup = BeautifulSoup(response.content, 'lxml')
+
+            # Find conference entries
+            conf_items = soup.find_all('div', class_='conf-instance')
+
+            for item in conf_items[:30]:  # Limit to top 30 conferences
+                try:
+                    # Extract conference name
+                    title_elem = item.find('h4')
+                    if not title_elem:
+                        continue
+
+                    conf_name = title_elem.get_text(strip=True)
+
+                    # Extract link
+                    link_elem = title_elem.find('a')
+                    conf_url = link_elem.get('href', 'N/A') if link_elem else 'N/A'
+
+                    # Extract date
+                    date_elem = item.find('span', class_='date')
+                    date_str = date_elem.get_text(strip=True) if date_elem else None
+                    conf_date = self.normalize_date(date_str)
+
+                    if not conf_date:
+                        continue
+
+                    # Only include future events
+                    if datetime.strptime(conf_date, "%Y-%m-%d") < datetime.now():
+                        continue
+
+                    # Extract location
+                    location_elem = item.find('span', class_='location')
+                    location = location_elem.get_text(strip=True) if location_elem else "TBD"
+
+                    # Extract deadline
+                    deadline_elem = item.find('span', class_='deadline')
+                    deadline = self.normalize_date(deadline_elem.get_text(strip=True)) if deadline_elem else "N/A"
+
+                    # Determine category
+                    category = "Machine Learning"
+                    if "NLP" in conf_name.upper() or "ACL" in conf_name.upper():
+                        category = "Natural Language Processing"
+                    elif "CV" in conf_name.upper() or "CVPR" in conf_name.upper() or "ICCV" in conf_name.upper():
+                        category = "Computer Vision"
+
+                    event = {
+                        "name": conf_name,
+                        "format": "Hybrid",
+                        "venue": self.extract_venue(location),
+                        "date": conf_date,
+                        "theme": category,
+                        "type": "Conference",
+                        "submission_deadline": deadline if deadline else "N/A",
+                        "ticket_start_date": "N/A",
+                        "ticket_end_date": "N/A",
+                        "url": conf_url,
+                        "description": f"{conf_name} - Top-tier {category} conference",
+                        "estimated_attendees": 3000
+                    }
+
+                    events.append(event)
+
+                except Exception as e:
+                    continue
+
+            print(f"  ✓ Found {len(events)} conferences from AI Deadlines")
+
+        except Exception as e:
+            print(f"  ⚠️  Error scraping AI Deadlines: {str(e)}")
+
+        return events
+
+    def get_curated_baseline_events(self) -> List[Dict]:
         """
-        Curated list of major AI events worldwide from Nov 2025 to Dec 2026.
-        This is a high-quality selection of conferences, summits, and workshops.
+        Curated baseline of major AI events (fallback if scraping fails).
+        These are high-quality, well-known events that should always be included.
         """
-        major_events = [
+        return [
             {
                 "name": "NeurIPS 2025",
                 "format": "Hybrid",
@@ -131,393 +355,74 @@ class AIEventsCrawler:
                 "ticket_start_date": "2026-05-01",
                 "ticket_end_date": "2026-08-02",
                 "url": "https://www.aclweb.org",
-                "description": "Premier conference for natural language processing and computational linguistics",
+                "description": "Premier conference for natural language processing",
                 "estimated_attendees": 6000
-            },
-            {
-                "name": "AAAI 2026",
-                "format": "Hybrid",
-                "venue": "Philadelphia, USA",
-                "date": "2026-02-09",
-                "theme": "Association for the Advancement of Artificial Intelligence",
-                "type": "Conference",
-                "submission_deadline": "2025-08-15",
-                "ticket_start_date": "2025-11-01",
-                "ticket_end_date": "2026-02-08",
-                "url": "https://aaai.org",
-                "description": "Major AI conference covering all aspects of artificial intelligence",
-                "estimated_attendees": 7000
-            },
-            {
-                "name": "AI Summit New York 2025",
-                "format": "In-person",
-                "venue": "New York, USA",
-                "date": "2025-12-10",
-                "theme": "Enterprise AI and Business Innovation",
-                "type": "Summit",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2025-06-01",
-                "ticket_end_date": "2025-12-09",
-                "url": "https://theaisummit.com",
-                "description": "Business-focused AI summit for enterprise leaders and practitioners",
-                "estimated_attendees": 5000
-            },
-            {
-                "name": "AI Summit London 2026",
-                "format": "In-person",
-                "venue": "London, UK",
-                "date": "2026-06-10",
-                "theme": "AI for Business Transformation",
-                "type": "Summit",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2026-01-15",
-                "ticket_end_date": "2026-06-09",
-                "url": "https://theaisummit.com",
-                "description": "Europe's leading AI event for business and technology leaders",
-                "estimated_attendees": 6000
-            },
-            {
-                "name": "RE•WORK Deep Learning Summit 2026",
-                "format": "Hybrid",
-                "venue": "San Francisco, USA",
-                "date": "2026-01-29",
-                "theme": "Deep Learning Applications and Research",
-                "type": "Summit",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2025-10-01",
-                "ticket_end_date": "2026-01-28",
-                "url": "https://www.re-work.co",
-                "description": "Applied deep learning for business and research",
-                "estimated_attendees": 2000
-            },
-            {
-                "name": "MLOps World 2026",
-                "format": "Hybrid",
-                "venue": "Austin, USA",
-                "date": "2026-06-03",
-                "theme": "Machine Learning Operations and Production ML",
-                "type": "Conference",
-                "submission_deadline": "2026-03-01",
-                "ticket_start_date": "2026-02-01",
-                "ticket_end_date": "2026-06-02",
-                "url": "https://mlopsworld.com",
-                "description": "The leading event for ML engineering and operations",
-                "estimated_attendees": 3000
-            },
-            {
-                "name": "Generative AI World 2026",
-                "format": "In-person",
-                "venue": "Las Vegas, USA",
-                "date": "2026-03-18",
-                "theme": "Generative AI and Large Language Models",
-                "type": "Summit",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2025-12-01",
-                "ticket_end_date": "2026-03-17",
-                "url": "https://www.gen-ai.world",
-                "description": "Focused on generative AI, LLMs, and creative AI applications",
-                "estimated_attendees": 4000
-            },
-            {
-                "name": "AI in Healthcare Summit 2026",
-                "format": "Hybrid",
-                "venue": "Boston, USA",
-                "date": "2026-05-12",
-                "theme": "AI Applications in Healthcare and Medicine",
-                "type": "Summit",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2026-02-01",
-                "ticket_end_date": "2026-05-11",
-                "url": "https://www.ai-healthcare-summit.com",
-                "description": "AI innovations for healthcare, diagnostics, and drug discovery",
-                "estimated_attendees": 2500
-            },
-            {
-                "name": "PyTorch Conference 2026",
-                "format": "Hybrid",
-                "venue": "San Francisco, USA",
-                "date": "2026-10-07",
-                "theme": "PyTorch and Deep Learning Frameworks",
-                "type": "Conference",
-                "submission_deadline": "2026-07-01",
-                "ticket_start_date": "2026-06-01",
-                "ticket_end_date": "2026-10-06",
-                "url": "https://pytorchconf.com",
-                "description": "Community conference for PyTorch developers and researchers",
-                "estimated_attendees": 3000
-            },
-            {
-                "name": "TensorFlow Dev Summit 2026",
-                "format": "Online",
-                "venue": "Virtual",
-                "date": "2026-03-25",
-                "theme": "TensorFlow and ML Development",
-                "type": "Summit",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2026-01-15",
-                "ticket_end_date": "2026-03-24",
-                "url": "https://www.tensorflow.org/dev-summit",
-                "description": "Google's annual TensorFlow developer conference",
-                "estimated_attendees": 10000
-            },
-            {
-                "name": "AI India Summit 2026",
-                "format": "Hybrid",
-                "venue": "Bangalore, India",
-                "date": "2026-02-25",
-                "theme": "AI Innovation in India and South Asia",
-                "type": "Summit",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2025-11-01",
-                "ticket_end_date": "2026-02-24",
-                "url": "https://www.aiindiasummit.com",
-                "description": "Leading AI event in India covering business and technology",
-                "estimated_attendees": 4000
-            },
-            {
-                "name": "AI China Conference 2026",
-                "format": "In-person",
-                "venue": "Beijing, China",
-                "date": "2026-07-22",
-                "theme": "AI Research and Industry in China",
-                "type": "Conference",
-                "submission_deadline": "2026-04-01",
-                "ticket_start_date": "2026-04-15",
-                "ticket_end_date": "2026-07-21",
-                "url": "https://www.aichinaconf.com",
-                "description": "Major AI conference showcasing Chinese AI research and applications",
-                "estimated_attendees": 8000
-            },
-            {
-                "name": "AI Africa Summit 2026",
-                "format": "Hybrid",
-                "venue": "Cape Town, South Africa",
-                "date": "2026-09-16",
-                "theme": "AI for African Development and Innovation",
-                "type": "Summit",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2026-05-01",
-                "ticket_end_date": "2026-09-15",
-                "url": "https://www.aiafricasummit.com",
-                "description": "Bringing AI innovation to solve African challenges",
-                "estimated_attendees": 2000
-            },
-            {
-                "name": "AI LATAM 2026",
-                "format": "Hybrid",
-                "venue": "São Paulo, Brazil",
-                "date": "2026-11-11",
-                "theme": "AI in Latin America",
-                "type": "Conference",
-                "submission_deadline": "2026-08-01",
-                "ticket_start_date": "2026-07-01",
-                "ticket_end_date": "2026-11-10",
-                "url": "https://www.ailatam.com",
-                "description": "Largest AI event in Latin America",
-                "estimated_attendees": 3500
-            },
-            {
-                "name": "EmTech Digital 2026",
-                "format": "In-person",
-                "venue": "San Francisco, USA",
-                "date": "2026-05-20",
-                "theme": "Emerging Technologies and Digital Transformation",
-                "type": "Conference",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2026-02-01",
-                "ticket_end_date": "2026-05-19",
-                "url": "https://events.technologyreview.com",
-                "description": "MIT Technology Review's conference on AI and emerging tech",
-                "estimated_attendees": 3000
-            },
-            {
-                "name": "AI for Good Global Summit 2026",
-                "format": "Hybrid",
-                "venue": "Geneva, Switzerland",
-                "date": "2026-06-29",
-                "theme": "AI for Sustainable Development Goals",
-                "type": "Summit",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2026-03-01",
-                "ticket_end_date": "2026-06-28",
-                "url": "https://aiforgood.itu.int",
-                "description": "UN's leading platform on AI for social good",
-                "estimated_attendees": 2500
-            },
-            {
-                "name": "FAccT 2026",
-                "format": "Hybrid",
-                "venue": "Barcelona, Spain",
-                "date": "2026-06-24",
-                "theme": "Fairness, Accountability, and Transparency in AI",
-                "type": "Conference",
-                "submission_deadline": "2026-01-31",
-                "ticket_start_date": "2026-03-01",
-                "ticket_end_date": "2026-06-23",
-                "url": "https://facctconference.org",
-                "description": "Leading conference on responsible AI, algorithmic fairness, and ethical considerations in machine learning",
-                "estimated_attendees": 2000
-            },
-            {
-                "name": "World Summit AI 2025",
-                "format": "In-person",
-                "venue": "Doha, Qatar",
-                "date": "2025-10-09",
-                "theme": "Global AI Innovation and Business Applications",
-                "type": "Summit",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2025-05-01",
-                "ticket_end_date": "2025-10-08",
-                "url": "https://worldsummit.ai",
-                "description": "World's premier AI summit bringing together industry leaders, researchers, and policymakers",
-                "estimated_attendees": 5000
-            },
-            {
-                "name": "EMNLP 2025",
-                "format": "Hybrid",
-                "venue": "Miami, USA",
-                "date": "2025-11-11",
-                "theme": "Empirical Methods in Natural Language Processing",
-                "type": "Conference",
-                "submission_deadline": "2025-06-15",
-                "ticket_start_date": "2025-08-15",
-                "ticket_end_date": "2025-11-10",
-                "url": "https://2025.emnlp.org",
-                "description": "Major conference on NLP and computational linguistics with latest research in language models",
-                "estimated_attendees": 5000
-            },
-            {
-                "name": "AISTATS 2026",
-                "format": "Hybrid",
-                "venue": "Valencia, Spain",
-                "date": "2026-05-04",
-                "theme": "Artificial Intelligence and Statistics",
-                "type": "Conference",
-                "submission_deadline": "2025-10-15",
-                "ticket_start_date": "2026-02-01",
-                "ticket_end_date": "2026-05-03",
-                "url": "https://aistats.org",
-                "description": "Interdisciplinary conference at the intersection of AI, machine learning, and statistics",
-                "estimated_attendees": 1500
-            },
-            {
-                "name": "AI World Government Summit 2026",
-                "format": "In-person",
-                "venue": "Dubai, UAE",
-                "date": "2026-02-11",
-                "theme": "AI in Government and Public Policy",
-                "type": "Summit",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2025-11-01",
-                "ticket_end_date": "2026-02-10",
-                "url": "https://worldgovernmentsummit.org",
-                "description": "Government-focused summit on AI policy, regulation, and public sector innovation",
-                "estimated_attendees": 4000
-            },
-            {
-                "name": "KDD 2026",
-                "format": "Hybrid",
-                "venue": "Chicago, USA",
-                "date": "2026-08-23",
-                "theme": "Knowledge Discovery and Data Mining",
-                "type": "Conference",
-                "submission_deadline": "2026-02-08",
-                "ticket_start_date": "2026-05-01",
-                "ticket_end_date": "2026-08-22",
-                "url": "https://kdd.org",
-                "description": "Premier conference on data science, data mining, and knowledge discovery",
-                "estimated_attendees": 4000
-            },
-            {
-                "name": "IJCAI 2026",
-                "format": "Hybrid",
-                "venue": "Montreal, Canada",
-                "date": "2026-08-29",
-                "theme": "International Joint Conference on Artificial Intelligence",
-                "type": "Conference",
-                "submission_deadline": "2026-01-21",
-                "ticket_start_date": "2026-05-01",
-                "ticket_end_date": "2026-08-28",
-                "url": "https://ijcai.org",
-                "description": "One of the oldest and most prestigious AI conferences covering all aspects of AI",
-                "estimated_attendees": 3500
-            },
-            {
-                "name": "AI & Big Data Expo 2026",
-                "format": "In-person",
-                "venue": "Amsterdam, Netherlands",
-                "date": "2026-03-11",
-                "theme": "AI and Big Data for Enterprise",
-                "type": "Expo",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2025-12-01",
-                "ticket_end_date": "2026-03-10",
-                "url": "https://aibigdataexpo.com",
-                "description": "Leading enterprise AI and big data expo with hands-on workshops and vendor exhibitions",
-                "estimated_attendees": 8000
-            },
-            {
-                "name": "ECCV 2026",
-                "format": "Hybrid",
-                "venue": "Milan, Italy",
-                "date": "2026-10-11",
-                "theme": "European Conference on Computer Vision",
-                "type": "Conference",
-                "submission_deadline": "2026-03-07",
-                "ticket_start_date": "2026-06-01",
-                "ticket_end_date": "2026-10-10",
-                "url": "https://eccv2026.eu",
-                "description": "Top European computer vision conference with cutting-edge research in visual AI",
-                "estimated_attendees": 3000
-            },
-            {
-                "name": "AI Hardware Summit 2026",
-                "format": "In-person",
-                "venue": "Santa Clara, USA",
-                "date": "2026-09-08",
-                "theme": "AI Chips, Accelerators, and Hardware Innovation",
-                "type": "Summit",
-                "submission_deadline": "N/A",
-                "ticket_start_date": "2026-05-01",
-                "ticket_end_date": "2026-09-07",
-                "url": "https://aihardwaresummit.com",
-                "description": "Focused on AI hardware, chip design, GPUs, TPUs, and edge AI acceleration",
-                "estimated_attendees": 2500
             }
         ]
 
-        new_events_added = 0
-        for event in major_events:
-            if self.add_event(event):
-                new_events_added += 1
-                print(f"➕ Added: {event['name']} ({event['date']})")
-
-        return new_events_added
-
     def run(self):
-        """Run the crawler and update events data."""
-        print("\n🤖 AI Events Crawler Starting...\n")
-        print(f"📅 Searching for events from Nov 2025 to Dec 2026\n")
+        """Main crawler execution."""
+        print("=" * 60)
+        print("🤖 AI Events Crawler - Real-time Data Collection")
+        print("=" * 60)
+        print(f"📅 Searching for AI/ML events worldwide\n")
 
-        new_events = self.crawl_major_ai_events()
+        new_events_count = 0
+
+        # Add curated baseline events first
+        print("📚 Adding curated baseline events...")
+        baseline_events = self.get_curated_baseline_events()
+        for event in baseline_events:
+            if self.add_event(event):
+                new_events_count += 1
+        print(f"  ✓ Added {new_events_count} baseline events\n")
+
+        if SCRAPING_ENABLED:
+            # Scrape WikiCFP
+            wikicfp_events = self.scrape_wikicfp()
+            wikicfp_new = 0
+            for event in wikicfp_events:
+                if self.add_event(event):
+                    wikicfp_new += 1
+                    new_events_count += 1
+            print(f"  ✓ Added {wikicfp_new} new events from WikiCFP\n")
+
+            # Scrape AI Deadlines
+            ai_deadline_events = self.scrape_ai_deadlines()
+            ai_deadlines_new = 0
+            for event in ai_deadline_events:
+                if self.add_event(event):
+                    ai_deadlines_new += 1
+                    new_events_count += 1
+            print(f"  ✓ Added {ai_deadlines_new} new events from AI Deadlines\n")
+        else:
+            print("⚠️  Scraping disabled - using baseline events only")
+            print("   Install dependencies: pip install -r requirements.txt\n")
 
         # Sort events by date
-        self.events.sort(key=lambda x: x['date'])
+        self.events.sort(key=lambda x: x.get('date', '9999-99-99'))
 
         # Add numbering
         for idx, event in enumerate(self.events, 1):
             event['#'] = idx
 
+        # Save data
         self.save_data()
 
-        if new_events > 0:
-            print(f"\n✨ Successfully added {new_events} new AI events!")
+        # Summary
+        print("=" * 60)
+        if new_events_count > 0:
+            print(f"✨ Successfully added {new_events_count} new AI events!")
         else:
-            print(f"\n💫 No new events found. All {len(self.events)} events are up to date!")
+            print(f"💫 No new events found. All {len(self.events)} events are up to date!")
 
         print(f"📊 Total events tracked: {len(self.events)}")
-        print(f"🌍 Geographic coverage: Global")
-        print(f"📅 Date range: {self.events[0]['date']} to {self.events[-1]['date']}")
+
+        if self.events:
+            print(f"🌍 Geographic coverage: Global")
+            print(f"📅 Date range: {self.events[0].get('date', 'N/A')} to {self.events[-1].get('date', 'N/A')}")
+
+        print("=" * 60)
 
 
 if __name__ == "__main__":
