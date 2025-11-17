@@ -63,13 +63,13 @@ jobs:
   deploy-pages:
     needs: crawl-and-update
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/claude/keep-all-that-015eUbhzi9C7eFDEJ3GvbwWU'
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: claude/keep-all-that-015eUbhzi9C7eFDEJ3GvbwWU
+          ref: main
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
